@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Implémentation VLSI FIR-LMS - Ornela Portfolio</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="project-vlsi">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html"><h2>← Retour au Portfolio</h2></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero du Projet -->
+    <section class="project-hero">
+        <div class="container">
+            <h1>Implémentation VLSI de Filtre FIR-LMS</h1>
+            <p class="project-meta">Laboratoire VLSI • VHDL / Vivado HLS • 2024</p>
+            <div class="project-links">
+                <a href="https://github.com/ornel237" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Voir sur GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Détails du Projet -->
+    <section class="project-details">
+        <div class="container">
+            <!-- Vue d'ensemble -->
+            <div class="detail-section">
+                <h2><i class="fas fa-info-circle"></i> Vue d'ensemble</h2>
+                <p>
+                    Conception et implémentation d'un filtre adaptatif FIR-LMS (Finite Impulse Response - Least Mean Squares) 
+                    en VHDL pour FPGA. Le projet compare deux approches de conception : une implémentation manuelle optimisée 
+                    en VHDL et une synthèse de haut niveau (HLS) via Vivado. Cette étude explore les compromis entre contrôle 
+                    du design, performances, consommation de ressources et temps de développement dans les systèmes de traitement 
+                    de signal numérique embarqués.
+                </p>
+            </div>
+
+            <!-- Contexte -->
+            <div class="detail-section">
+                <h2><i class="fas fa-graduation-cap"></i> Contexte</h2>
+                <ul>
+                    <li><strong>Cours :</strong> Conception VLSI - UQTR</li>
+                    <li><strong>Plateforme :</strong> FPGA Xilinx (Artix-7 / Zynq)</li>
+                    <li><strong>Outils :</strong> Vivado Design Suite, Vivado HLS</li>
+                    <li><strong>Durée :</strong> Laboratoire de session (8 semaines)</li>
+                    <li><strong>Objectif :</strong> Maîtriser le design FPGA et analyser les méthodologies de conception</li>
+                </ul>
+            </div>
+
+            <!-- Fonctionnalités -->
+            <div class="detail-section">
+                <h2><i class="fas fa-list-check"></i> Caractéristiques du filtre</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-wave-square"></i>
+                        <h3>Filtre FIR adaptatif</h3>
+                        <p>Implémentation d'un filtre à réponse impulsionnelle finie avec adaptation en temps réel</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Algorithme LMS</h3>
+                        <p>Ajustement automatique des coefficients pour minimiser l'erreur quadratique moyenne</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-microchip"></i>
+                        <h3>Design VHDL optimisé</h3>
+                        <p>Architecture pipeline avec gestion fine des ressources matérielles</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-rocket"></i>
+                        <h3>Synthèse HLS</h3>
+                        <p>Génération automatique de RTL à partir de code C++ de haut niveau</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <h3>Analyse de performances</h3>
+                        <p>Comparaison détaillée : latence, débit, utilisation de ressources, fréquence</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-memory"></i>
+                        <h3>Optimisation mémoire</h3>
+                        <p>Utilisation de BRAM et registres pour stockage des échantillons et coefficients</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture technique -->
+            <div class="detail-section">
+                <h2><i class="fas fa-code"></i> Architecture technique</h2>
+                
+                <h3>Algorithme FIR-LMS</h3>
+                <p>Le filtre FIR adaptatif utilise l'algorithme LMS pour mettre à jour ses coefficients :</p>
+                <pre><code>-- Équation du filtre FIR
+y(n) = Σ [w(k) * x(n-k)]  pour k = 0 à N-1
+
+-- Mise à jour LMS des coefficients
+e(n) = d(n) - y(n)                    -- Erreur
+w(k) = w(k) + μ * e(n) * x(n-k)      -- Adaptation</code></pre>
+
+                <h3>Architecture VHDL manuelle</h3>
+                <pre><code>entity FIR_LMS is
+    generic (
+        N_TAPS : integer := 16;
+        DATA_WIDTH : integer := 16
+    );
+    port (
+        clk      : in  std_logic;
+        rst      : in  std_logic;
+        x_in     : in  signed(DATA_WIDTH-1 downto 0);
+        d_in     : in  signed(DATA_WIDTH-1 downto 0);
+        y_out    : out signed(DATA_WIDTH-1 downto 0);
+        error    : out signed(DATA_WIDTH-1 downto 0)
+    );
+end FIR_LMS;</code></pre>
+
+                <h3>Approche HLS (C++)</h3>
+                <pre><code>void fir_lms_hls(
+    data_t x_in,
+    data_t d_in,
+    data_t &y_out,
+    data_t &error
+) {
+    #pragma HLS PIPELINE II=1
+    #pragma HLS INTERFACE ap_ctrl_none port=return
+    
+    static data_t weights[N_TAPS];
+    static data_t samples[N_TAPS];
+    
+    // FIR filtering
+    acc_t acc = 0;
+    for(int i = 0; i < N_TAPS; i++) {
+        #pragma HLS UNROLL
+        acc += weights[i] * samples[i];
+    }
+    
+    y_out = acc;
+    error = d_in - y_out;
+    
+    // LMS weight update
+    for(int i = 0; i < N_TAPS; i++) {
+        weights[i] += MU * error * samples[i];
+    }
+}</code></pre>
+            </div>
+
+            <!-- Défis et solutions -->
+            <div class="detail-section">
+                <h2><i class="fas fa-lightbulb"></i> Défis techniques et solutions</h2>
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 1 : Précision arithmétique</h3>
+                        <p>Balance entre précision et utilisation de ressources avec arithmétique à virgule fixe.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Analyse détaillée de quantification, choix optimal du nombre de bits (Q15) et 
+                        vérification par simulation MATLAB/Python.</p>
+                    </div>
+                </div>
+
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 2 : Optimisation pipeline</h3>
+                        <p>Maximiser le débit tout en minimisant la latence et l'utilisation de ressources.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Architecture pipeline à plusieurs étages avec équilibrage des chemins critiques 
+                        et insertion de registres stratégiques.</p>
+                    </div>
+                </div>
+
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 3 : Consommation de DSP slices</h3>
+                        <p>Les multiplications consomment beaucoup de ressources DSP sur le FPGA.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Utilisation optimale des DSP48E1, multiplexage temporel pour certains calculs, 
+                        et directives HLS pour contrôler l'allocation des ressources.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résultats comparatifs -->
+            <div class="detail-section">
+                <h2><i class="fas fa-chart-bar"></i> Résultats comparatifs</h2>
+                <h3>VHDL manuel vs. Vivado HLS</h3>
+                <p>Comparaison des deux approches de conception :</p>
+                
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Fréquence max : VHDL (250 MHz) vs HLS (200 MHz)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-microchip"></i>
+                        <span>LUTs : VHDL (850) vs HLS (1200)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-memory"></i>
+                        <span>DSP48 : VHDL (16) vs HLS (20)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-hourglass"></i>
+                        <span>Latence : VHDL (5 cycles) vs HLS (8 cycles)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-code"></i>
+                        <span>Lignes de code : VHDL (500) vs HLS (150)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>Temps de développement : VHDL (3 sem.) vs HLS (1 sem.)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technologies utilisées -->
+            <div class="detail-section">
+                <h2><i class="fas fa-tools"></i> Technologies et outils</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>VHDL (IEEE 1076)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-code"></i>
+                        <span>C++ (HLS)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-microchip"></i>
+                        <span>Vivado Design Suite</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-rocket"></i>
+                        <span>Vivado HLS</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>MATLAB (verification)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-vial"></i>
+                        <span>ModelSim / XSIM</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>Xilinx FPGA (Artix-7)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-wave-square"></i>
+                        <span>DSP Theory</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apprentissages -->
+            <div class="detail-section">
+                <h2><i class="fas fa-brain"></i> Compétences développées</h2>
+                <ul class="skills-learned">
+                    <li>Conception de systèmes VLSI pour traitement de signal numérique</li>
+                    <li>Maîtrise du langage VHDL et des méthodologies RTL</li>
+                    <li>Utilisation de Vivado HLS pour synthèse de haut niveau</li>
+                    <li>Optimisation d'architectures pipeline et parallèles</li>
+                    <li>Analyse des compromis performance/ressources/consommation</li>
+                    <li>Arithmétique à virgule fixe et analyse de quantification</li>
+                    <li>Vérification et simulation de designs matériels</li>
+                    <li>Documentation technique et rapports d'analyse comparatifs</li>
+                </ul>
+            </div>
+
+            <!-- Conclusion -->
+            <div class="detail-section">
+                <h2><i class="fas fa-lightbulb"></i> Conclusions</h2>
+                <ul>
+                    <li>📊 <strong>VHDL manuel</strong> : Meilleur contrôle, performances supérieures, mais temps de développement plus long</li>
+                    <li>🚀 <strong>Vivado HLS</strong> : Développement rapide, bon pour le prototypage, mais moins d'optimisation fine</li>
+                    <li>⚖️ <strong>Compromis</strong> : Le choix dépend des contraintes du projet (temps, performance, complexité)</li>
+                    <li>🎯 <strong>Hybride</strong> : Une approche combinée peut être optimale pour les grands systèmes</li>
+                </ul>
+            </div>
+
+            <!-- Liens -->
+            <div class="detail-section cta-section">
+                <h2>Accéder au code</h2>
+                <p>Code source VHDL, scripts HLS et documentation technique disponibles.</p>
+                <a href="https://github.com/ornel237" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Voir sur GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Domen Tchuisseu Lucresse Ornela. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>

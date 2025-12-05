@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Gestion d'Aéroport - Ornela Portfolio</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="project-airport">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html"><h2>← Retour au Portfolio</h2></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero du Projet -->
+    <section class="project-hero">
+        <div class="container">
+            <h1>Système de Gestion de Vols Aéroportuaires</h1>
+            <p class="project-meta">Projet académique • C • 2024</p>
+            <div class="project-links">
+                <a href="https://github.com/ornel237/airport-management-system" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Voir sur GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Détails du Projet -->
+    <section class="project-details">
+        <div class="container">
+            <!-- Vue d'ensemble -->
+            <div class="detail-section">
+                <h2><i class="fas fa-info-circle"></i> Vue d'ensemble</h2>
+                <p>
+                    Application console développée en C pour gérer l'ensemble des opérations d'un aéroport, 
+                    incluant la gestion des vols, l'enregistrement des passagers et le suivi des réservations. 
+                    Ce projet collaboratif met en œuvre des concepts avancés de structures de données et 
+                    d'allocation mémoire dynamique.
+                </p>
+            </div>
+
+            <!-- Contexte -->
+            <div class="detail-section">
+                <h2><i class="fas fa-graduation-cap"></i> Contexte</h2>
+                <ul>
+                    <li><strong>Cours :</strong> Programmation en C - UQTR</li>
+                    <li><strong>Équipe :</strong> Marème Baithily Hanne, Domen Tchuisseu Lucresse Ornela, Samira Elodie Bambara</li>
+                    <li><strong>Durée :</strong> 4 semaines</li>
+                    <li><strong>Rôle :</strong> Développement des fonctionnalités principales et gestion de mémoire</li>
+                </ul>
+            </div>
+
+            <!-- Fonctionnalités -->
+            <div class="detail-section">
+                <h2><i class="fas fa-list-check"></i> Fonctionnalités principales</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-plane-departure"></i>
+                        <h3>Gestion des vols</h3>
+                        <p>Ajout de nouveaux vols avec numéro, date, heure, aéroports de départ/arrivée et capacité</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>Enregistrement clients</h3>
+                        <p>Création de profils clients avec passeport, nom, prénom et date de naissance</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chair"></i>
+                        <h3>Gestion des places</h3>
+                        <p>Vérification automatique de disponibilité et mise à jour en temps réel</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-search"></i>
+                        <h3>Recherche multicritères</h3>
+                        <p>Recherche de vols par horaire, aéroport ou numéro de passeport</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture technique -->
+            <div class="detail-section">
+                <h2><i class="fas fa-code"></i> Architecture technique</h2>
+                <h3>Structures de données</h3>
+                <pre><code>// Structure Vol
+typedef struct Vol {
+    int numeroDeVol;
+    char date[80];
+    char heure[80];
+    char areoportDepart[100];
+    char areoportArrivée[100];
+    int nombreDePlaceTotale;
+    int nombreDePlaceDispo;
+} Vol;
+
+// Liste chaînée pour les vols
+typedef struct Cellule {
+    Vol data;
+    struct Cellule *suivant;
+} Cellule;
+typedef Cellule* liste;</code></pre>
+
+                <h3>Gestion de la mémoire</h3>
+                <p>Utilisation d'allocation dynamique avec <code>malloc()</code> pour créer des listes chaînées flexibles :</p>
+                <pre><code>Cellule *nouvelle_cellule = malloc(sizeof(Cellule));
+nouvelle_cellule->data = nouveau_vol;
+nouvelle_cellule->suivant = *tete_liste_vols;</code></pre>
+            </div>
+
+            <!-- Défis et solutions -->
+            <div class="detail-section">
+                <h2><i class="fas fa-lightbulb"></i> Défis techniques et solutions</h2>
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 1 : Gestion de la concurrence des réservations</h3>
+                        <p>Comment éviter qu'un vol soit surréservé ?</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Vérification systématique de <code>nombreDePlaceDispo</code> avant chaque réservation 
+                        et décrémentation atomique du compteur.</p>
+                    </div>
+                </div>
+
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 2 : Recherche efficace dans les listes</h3>
+                        <p>Parcourir des listes chaînées peut être lent.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Implémentation d'algorithmes de recherche linéaire optimisés avec arrêt précoce 
+                        dès que l'élément est trouvé.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technologies utilisées -->
+            <div class="detail-section">
+                <h2><i class="fas fa-tools"></i> Technologies et concepts</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fas fa-code"></i>
+                        <span>Langage C (C99)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-link"></i>
+                        <span>Listes chaînées</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-memory"></i>
+                        <span>Allocation dynamique</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>Structures (structs)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>Interface console</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fab fa-git-alt"></i>
+                        <span>Git / GitHub</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apprentissages -->
+            <div class="detail-section">
+                <h2><i class="fas fa-brain"></i> Compétences développées</h2>
+                <ul class="skills-learned">
+                    <li>Maîtrise des structures de données dynamiques en C</li>
+                    <li>Gestion rigoureuse de la mémoire (malloc, free)</li>
+                    <li>Débogage de programmes complexes avec pointeurs</li>
+                    <li>Travail collaboratif sur un projet technique</li>
+                    <li>Validation et gestion des erreurs utilisateur</li>
+                    <li>Documentation de code professionnel</li>
+                </ul>
+            </div>
+
+            <!-- Améliorations futures -->
+            <div class="detail-section">
+                <h2><i class="fas fa-rocket"></i> Améliorations possibles</h2>
+                <ul>
+                    <li>💾 Sauvegarde persistante des données (fichiers ou base de données)</li>
+                    <li>🖥️ Interface graphique avec GTK+ ou Qt</li>
+                    <li>📧 Système de confirmation de réservation par email</li>
+                    <li>📊 Génération de rapports et statistiques</li>
+                    <li>🔐 Système d'authentification pour les agents</li>
+                </ul>
+            </div>
+
+            <!-- Liens -->
+            <div class="detail-section cta-section">
+                <h2>Voir le code</h2>
+                <p>Le code source complet est disponible sur GitHub avec documentation détaillée.</p>
+                <a href="https://github.com/ornel237/airport-management-system" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Accéder au repository
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Domen Tchuisseu Lucresse Ornela. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>

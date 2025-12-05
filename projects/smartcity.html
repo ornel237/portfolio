@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City Digital Twin - Ornela Portfolio</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="project-smartcity">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html"><h2>← Retour au Portfolio</h2></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero du Projet -->
+    <section class="project-hero">
+        <div class="container">
+            <h1>Smart City Digital Twin</h1>
+            <p class="project-meta">Projet académique • Unity 3D / C# • 2024</p>
+            <div class="project-links">
+                <a href="https://github.com/ornel237" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Voir sur GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Détails du Projet -->
+    <section class="project-details">
+        <div class="container">
+            <!-- Vue d'ensemble -->
+            <div class="detail-section">
+                <h2><i class="fas fa-info-circle"></i> Vue d'ensemble</h2>
+                <p>
+                    Développement d'un jumeau numérique interactif d'une ville intelligente qui intègre Unity 3D pour la 
+                    visualisation 3D, OpenStreetMap pour les données géographiques réelles, et SUMO pour la simulation de 
+                    trafic en temps réel. Le projet représente une plateforme complète pour la gestion urbaine intelligente 
+                    avec des capteurs IoT virtuels et des systèmes de décision basés sur l'IA.
+                </p>
+            </div>
+
+            <!-- Contexte -->
+            <div class="detail-section">
+                <h2><i class="fas fa-graduation-cap"></i> Contexte</h2>
+                <ul>
+                    <li><strong>Type :</strong> Projet de fin d'études / Recherche</li>
+                    <li><strong>Institution :</strong> UQTR</li>
+                    <li><strong>Durée :</strong> 3 mois</li>
+                    <li><strong>Rôle :</strong> Développement complet, intégration de données, visualisation 3D</li>
+                </ul>
+            </div>
+
+            <!-- Fonctionnalités -->
+            <div class="detail-section">
+                <h2><i class="fas fa-list-check"></i> Fonctionnalités principales</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-map"></i>
+                        <h3>Intégration OpenStreetMap</h3>
+                        <p>Extraction et reconstruction 3D de réseaux routiers réels avec projections Mercator</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-car"></i>
+                        <h3>Simulation de trafic SUMO</h3>
+                        <p>Simulation de trafic réaliste avec gestion des flux de véhicules en temps réel</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-cube"></i>
+                        <h3>Visualisation 3D Unity</h3>
+                        <p>Rendu 3D interactif avec navigation libre et exploration de la ville virtuelle</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-wifi"></i>
+                        <h3>Capteurs IoT virtuels</h3>
+                        <p>Simulation de capteurs intelligents pour la collecte de données urbaines</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-brain"></i>
+                        <h3>Gestion IA du trafic</h3>
+                        <p>Système intelligent pour optimiser les flux de circulation</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-road"></i>
+                        <h3>Génération procédurale</h3>
+                        <p>Création automatique de routes et intersections à partir de données géographiques</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture technique -->
+            <div class="detail-section">
+                <h2><i class="fas fa-code"></i> Architecture technique</h2>
+                <h3>Pipeline de données</h3>
+                <p>Le système suit un pipeline complexe de traitement de données :</p>
+                <pre><code>OpenStreetMap API → Parser C# → Projection Mercator → 
+Unity Scene → SUMO Integration → Real-time Visualization</code></pre>
+
+                <h3>Transformations géométriques</h3>
+                <p>Conversion des coordonnées GPS en coordonnées Unity :</p>
+                <pre><code>// Projection Mercator
+float x = (longitude - centerLon) * scaleFactor;
+float z = Math.Log(Math.Tan(Math.PI / 4 + latitude * Math.PI / 360)) * scaleFactor;
+
+// Conversion vers Unity
+Vector3 unityPos = new Vector3(x, 0, z);</code></pre>
+
+                <h3>Génération procédurale de routes</h3>
+                <p>Utilisation de Road Architect pour créer des réseaux routiers dynamiques avec intersections, 
+                virages et marquages au sol automatiques.</p>
+            </div>
+
+            <!-- Défis et solutions -->
+            <div class="detail-section">
+                <h2><i class="fas fa-lightbulb"></i> Défis techniques et solutions</h2>
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 1 : Performance avec données massives</h3>
+                        <p>OpenStreetMap fournit des millions de points pour une ville complète.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Implémentation de LOD (Level of Detail), culling spatial, et chargement par chunks 
+                        pour optimiser les performances.</p>
+                    </div>
+                </div>
+
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 2 : Synchronisation Unity-SUMO</h3>
+                        <p>Maintenir la cohérence entre la simulation de trafic et la visualisation 3D.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Développement d'un système de communication TCP/IP pour synchroniser les positions 
+                        des véhicules en temps réel avec interpolation pour la fluidité.</p>
+                    </div>
+                </div>
+
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 3 : Précision géographique</h3>
+                        <p>Maintenir la précision lors des conversions de coordonnées à grande échelle.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Utilisation de projections Mercator transverses et de points de référence locaux 
+                        pour minimiser les distorsions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technologies utilisées -->
+            <div class="detail-section">
+                <h2><i class="fas fa-tools"></i> Technologies et outils</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fab fa-unity"></i>
+                        <span>Unity 3D (2021.3+)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-code"></i>
+                        <span>C# (.NET)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>OpenStreetMap API</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-car-side"></i>
+                        <span>SUMO Traffic Simulator</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-road"></i>
+                        <span>Road Architect</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-network-wired"></i>
+                        <span>TCP/IP Communication</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-file-code"></i>
+                        <span>XML/JSON Parsing</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-brain"></i>
+                        <span>ML Agents (Unity)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apprentissages -->
+            <div class="detail-section">
+                <h2><i class="fas fa-brain"></i> Compétences développées</h2>
+                <ul class="skills-learned">
+                    <li>Intégration de données géospatiales dans des environnements 3D</li>
+                    <li>Développement de systèmes complexes avec multiples APIs</li>
+                    <li>Optimisation de performances pour le rendu 3D en temps réel</li>
+                    <li>Implémentation de projections cartographiques et transformations géométriques</li>
+                    <li>Développement de parsers pour formats OSM (XML)</li>
+                    <li>Communication inter-processus et synchronisation en temps réel</li>
+                    <li>Architecture logicielle modulaire et extensible</li>
+                    <li>Documentation technique et scientifique</li>
+                </ul>
+            </div>
+
+            <!-- Applications -->
+            <div class="detail-section">
+                <h2><i class="fas fa-lightbulb"></i> Applications possibles</h2>
+                <ul>
+                    <li>🏙️ Planification urbaine et analyse d'impact de nouveaux projets</li>
+                    <li>🚦 Optimisation des systèmes de feux de circulation</li>
+                    <li>🚨 Simulation de scénarios d'urgence et évacuation</li>
+                    <li>📊 Visualisation de données urbaines en temps réel</li>
+                    <li>🎓 Formation et éducation en urbanisme</li>
+                    <li>🔬 Recherche en mobilité urbaine intelligente</li>
+                </ul>
+            </div>
+
+            <!-- Liens -->
+            <div class="detail-section cta-section">
+                <h2>Explorer le projet</h2>
+                <p>Pour plus d'informations sur ce projet de recherche et voir des démonstrations.</p>
+                <a href="https://github.com/ornel237" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Voir sur GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Domen Tchuisseu Lucresse Ornela. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>

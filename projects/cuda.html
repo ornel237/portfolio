@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimisation CUDA - Ornela Portfolio</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="project-cuda">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="../index.html"><h2>← Retour au Portfolio</h2></a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero du Projet -->
+    <section class="project-hero">
+        <div class="container">
+            <h1>Optimisation de Multiplication Matricielle en CUDA</h1>
+            <p class="project-meta">Laboratoire GPU Computing • CUDA C++ • 2024</p>
+            <div class="project-links">
+                <a href="https://github.com/ornel237" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Voir sur GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Détails du Projet -->
+    <section class="project-details">
+        <div class="container">
+            <!-- Vue d'ensemble -->
+            <div class="detail-section">
+                <h2><i class="fas fa-info-circle"></i> Vue d'ensemble</h2>
+                <p>
+                    Développement et optimisation progressive de kernels CUDA pour la multiplication de matrices sur GPU. 
+                    Le projet explore différentes techniques d'optimisation, de l'implémentation naïve jusqu'à des versions 
+                    hautement optimisées utilisant la mémoire partagée, le tiling, et la coalescence mémoire. L'objectif est 
+                    de démontrer les gains de performances massifs obtenus par l'application systématique de techniques 
+                    d'optimisation GPU pour le calcul haute performance (HPC).
+                </p>
+            </div>
+
+            <!-- Contexte -->
+            <div class="detail-section">
+                <h2><i class="fas fa-graduation-cap"></i> Contexte</h2>
+                <ul>
+                    <li><strong>Cours :</strong> Programmation GPU et Calcul Parallèle - UQTR</li>
+                    <li><strong>Matériel :</strong> GPU NVIDIA (Compute Capability 7.0+)</li>
+                    <li><strong>Environnement :</strong> CUDA Toolkit 11.x / 12.x</li>
+                    <li><strong>Durée :</strong> Série de laboratoires (6 semaines)</li>
+                    <li><strong>Objectif :</strong> Maîtriser l'optimisation GPU et atteindre les performances théoriques</li>
+                </ul>
+            </div>
+
+            <!-- Fonctionnalités -->
+            <div class="detail-section">
+                <h2><i class="fas fa-list-check"></i> Versions implémentées</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-layer-group"></i>
+                        <h3>Version 1 : Naïve</h3>
+                        <p>Implémentation de base avec un thread par élément de sortie</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-memory"></i>
+                        <h3>Version 2 : Mémoire globale</h3>
+                        <p>Optimisation des accès mémoire avec coalescence</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-th"></i>
+                        <h3>Version 3 : Tiling basique</h3>
+                        <p>Découpage en tuiles pour réutiliser les données</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-rocket"></i>
+                        <h3>Version 4 : Shared Memory</h3>
+                        <p>Utilisation de la mémoire partagée rapide pour les tuiles</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <h3>Version 5 : Optimisée</h3>
+                        <p>Combinaison de toutes les techniques + bank conflict resolution</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Analyse de performances</h3>
+                        <p>Benchmarking complet avec nvprof/nsight et comparaisons CPU</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Architecture technique -->
+            <div class="detail-section">
+                <h2><i class="fas fa-code"></i> Implémentations techniques</h2>
+                
+                <h3>Version 1 : Kernel naïf</h3>
+                <pre><code>__global__ void matrixMulNaive(float *A, float *B, float *C, int N) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    if (row < N && col < N) {
+        float sum = 0.0f;
+        for (int k = 0; k < N; k++) {
+            sum += A[row * N + k] * B[k * N + col];
+        }
+        C[row * N + col] = sum;
+    }
+}</code></pre>
+
+                <h3>Version 4 : Avec mémoire partagée et tiling</h3>
+                <pre><code>__global__ void matrixMulShared(float *A, float *B, float *C, int N) {
+    __shared__ float tileA[TILE_SIZE][TILE_SIZE];
+    __shared__ float tileB[TILE_SIZE][TILE_SIZE];
+    
+    int row = blockIdx.y * TILE_SIZE + threadIdx.y;
+    int col = blockIdx.x * TILE_SIZE + threadIdx.x;
+    float sum = 0.0f;
+    
+    // Itérer sur les tuiles
+    for (int t = 0; t < (N + TILE_SIZE - 1) / TILE_SIZE; t++) {
+        // Charger les tuiles en mémoire partagée
+        if (row < N && t * TILE_SIZE + threadIdx.x < N)
+            tileA[threadIdx.y][threadIdx.x] = A[row * N + t * TILE_SIZE + threadIdx.x];
+        else
+            tileA[threadIdx.y][threadIdx.x] = 0.0f;
+            
+        if (col < N && t * TILE_SIZE + threadIdx.y < N)
+            tileB[threadIdx.y][threadIdx.x] = B[(t * TILE_SIZE + threadIdx.y) * N + col];
+        else
+            tileB[threadIdx.y][threadIdx.x] = 0.0f;
+            
+        __syncthreads();
+        
+        // Calculer le produit partiel
+        for (int k = 0; k < TILE_SIZE; k++) {
+            sum += tileA[threadIdx.y][k] * tileB[k][threadIdx.x];
+        }
+        
+        __syncthreads();
+    }
+    
+    if (row < N && col < N) {
+        C[row * N + col] = sum;
+    }
+}</code></pre>
+
+                <h3>Configuration de lancement</h3>
+                <pre><code>// Configuration des blocs et grille
+dim3 blockDim(TILE_SIZE, TILE_SIZE);
+dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE, 
+             (N + TILE_SIZE - 1) / TILE_SIZE);
+
+// Lancement du kernel
+matrixMulShared<<<gridDim, blockDim>>>(d_A, d_B, d_C, N);</code></pre>
+            </div>
+
+            <!-- Défis et solutions -->
+            <div class="detail-section">
+                <h2><i class="fas fa-lightbulb"></i> Défis techniques et solutions</h2>
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 1 : Accès mémoire non coalescés</h3>
+                        <p>Les accès désordonnés à la mémoire globale limitent les performances.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Restructuration des accès pour assurer la coalescence : threads consécutifs 
+                        accèdent à des adresses mémoire consécutives (stride-1 access).</p>
+                    </div>
+                </div>
+
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 2 : Latence de la mémoire globale</h3>
+                        <p>La mémoire globale est 100x plus lente que la mémoire partagée.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Implémentation de tiling avec mémoire partagée : chaque tuile est chargée 
+                        une fois et réutilisée TILE_SIZE fois, réduisant les accès globaux.</p>
+                    </div>
+                </div>
+
+                <div class="challenge-solution">
+                    <div class="challenge">
+                        <h3>Défi 3 : Bank conflicts</h3>
+                        <p>Les conflits de bancs mémoire réduisent la bande passante de la mémoire partagée.</p>
+                    </div>
+                    <div class="solution">
+                        <h3>Solution</h3>
+                        <p>Padding des tableaux partagés et réorganisation des accès pour éviter que 
+                        plusieurs threads accèdent au même banc simultanément.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résultats de performance -->
+            <div class="detail-section">
+                <h2><i class="fas fa-chart-bar"></i> Résultats de performances</h2>
+                <h3>Matrices 2048 x 2048 (valeurs typiques)</h3>
+                
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fas fa-desktop"></i>
+                        <span>CPU (1 core) : ~45 secondes</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-desktop"></i>
+                        <span>CPU (8 cores) : ~8 secondes</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-microchip"></i>
+                        <span>GPU Naïf : ~1.2 secondes (37x speedup)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-memory"></i>
+                        <span>GPU avec coalescence : ~0.45s (100x)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-rocket"></i>
+                        <span>GPU + Shared Memory : ~0.085s (530x)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-fire"></i>
+                        <span>GPU Optimisé : ~0.048s (937x speedup!)</span>
+                    </div>
+                </div>
+
+                <h3>Métriques d'optimisation</h3>
+                <ul>
+                    <li>📊 <strong>Occupation GPU :</strong> 25% → 85% (naïf → optimisé)</li>
+                    <li>💾 <strong>Bande passante :</strong> 150 GB/s → 750 GB/s (95% du théorique)</li>
+                    <li>⚡ <strong>GFLOPS :</strong> 200 → 4800 GFLOPS</li>
+                    <li>🔄 <strong>Réduction accès mémoire globale :</strong> 100% → 6% (grâce au tiling)</li>
+                </ul>
+            </div>
+
+            <!-- Technologies utilisées -->
+            <div class="detail-section">
+                <h2><i class="fas fa-tools"></i> Technologies et outils</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <i class="fab fa-nvidia"></i>
+                        <span>CUDA C/C++</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-microchip"></i>
+                        <span>NVIDIA GPU (RTX/Tesla)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-tools"></i>
+                        <span>CUDA Toolkit 11+</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>nvprof / Nsight Compute</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-terminal"></i>
+                        <span>nvcc Compiler</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-code"></i>
+                        <span>C++ (host code)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-vial"></i>
+                        <span>cuBLAS (comparison)</span>
+                    </div>
+                    <div class="tech-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>Visual Studio / Linux</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apprentissages -->
+            <div class="detail-section">
+                <h2><i class="fas fa-brain"></i> Compétences développées</h2>
+                <ul class="skills-learned">
+                    <li>Programmation parallèle massivement avec CUDA</li>
+                    <li>Compréhension approfondie de l'architecture GPU (warps, SM, mémoire)</li>
+                    <li>Techniques d'optimisation : tiling, shared memory, coalescence</li>
+                    <li>Profilage et analyse de performances avec Nsight</li>
+                    <li>Gestion de la hiérarchie mémoire GPU (global, shared, registers)</li>
+                    <li>Synchronisation et coordination de threads</li>
+                    <li>Calcul haute performance (HPC) et benchmarking</li>
+                    <li>Analyse des compromis occupancy vs. ressources</li>
+                </ul>
+            </div>
+
+            <!-- Techniques avancées -->
+            <div class="detail-section">
+                <h2><i class="fas fa-rocket"></i> Techniques d'optimisation appliquées</h2>
+                <ul>
+                    <li>🧩 <strong>Tiling (Blocking) :</strong> Découpage des matrices pour réutiliser les données</li>
+                    <li>💾 <strong>Shared Memory :</strong> Cache rapide on-chip partagé entre threads d'un bloc</li>
+                    <li>📐 <strong>Memory Coalescence :</strong> Accès mémoire alignés et consécutifs</li>
+                    <li>🔄 <strong>Loop Unrolling :</strong> Déroulage de boucles pour réduire les branches</li>
+                    <li>⚖️ <strong>Occupancy Optimization :</strong> Équilibrer threads vs. ressources partagées</li>
+                    <li>🏦 <strong>Bank Conflict Avoidance :</strong> Éviter les conflits de bancs mémoire</li>
+                    <li>📊 <strong>Grid Stride Pattern :</strong> Gérer des données plus grandes que la grille</li>
+                    <li>⏱️ <strong>Streams & Async :</strong> Overlapping computation et transfers</li>
+                </ul>
+            </div>
+
+            <!-- Liens -->
+            <div class="detail-section cta-section">
+                <h2>Explorer le code</h2>
+                <p>Code source complet des différentes versions, scripts de benchmark et documentation.</p>
+                <a href="https://github.com/ornel237" class="btn btn-primary" target="_blank">
+                    <i class="fab fa-github"></i> Voir sur GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Domen Tchuisseu Lucresse Ornela. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>
